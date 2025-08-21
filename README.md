@@ -64,7 +64,7 @@ This project is open source and available under the MIT License.
 
 **Bowen Yao**
 - GitHub: [@BowenYao-code](https://github.com/BowenYao-code)
-- LinkedIn: [Bowen Yao](https://linkedin.com/in/bowenyao)
+- LinkedIn: [Bowen Yao](https://linkedin.com/in/bowen-yao)
 
 ## 🙏 Acknowledgments
 
