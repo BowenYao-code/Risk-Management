@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}Structured Products - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Same style as Pricing page) -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Structured</span>
+                    <span class="gradient-text-alt">Products</span>
+                </h1>
+                <p class="hero-subtitle">EXOTIC OPTIONS & DERIVATIVES</p>
+                <p class="hero-description">
+                    Advanced structured products pricing and analysis<br>
+                    Barrier options, autocallables, and exotic derivatives.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Product Configuration</h5>
+                
+                <form id="structuredForm">
+                    <div class="input-group-modern">
+                        <label for="productType" class="form-label-modern">Product Type</label>
+                        <select class="form-control-modern" id="productType">
+                            <option value="autocall">Autocallable</option>
+                            <option value="barrier">Barrier Option</option>
+                            <option value="asian">Asian Option</option>
+                            <option value="lookback">Lookback Option</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="underlying" class="form-label-modern">Underlying Asset</label>
+                        <input type="text" class="form-control-modern" id="underlying" value="S&P 500">
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="initialLevel" class="form-label-modern">Initial Level</label>
+                        <input type="number" class="form-control-modern" id="initialLevel" value="100" step="0.01">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="barrierLevel" class="form-label-modern">Barrier Level</label>
+                        <input type="number" class="form-control-modern" id="barrierLevel" value="70" step="1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="couponRate" class="form-label-modern">Coupon Rate</label>
+                        <input type="number" class="form-control-modern" id="couponRate" value="8" step="0.1">
+                        <span class="input-suffix">% p.a.</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="maturity" class="form-label-modern">Maturity</label>
+                        <input type="number" class="form-control-modern" id="maturity" value="3" min="1" max="10">
+                        <span class="input-suffix">years</span>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-calculate">
+                            <i class="fas fa-chart-line me-2"></i>Calculate Price
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetStructuredForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+
+                <div id="structuredResults" class="mt-4"></div>
+            </div>
+
+            <!-- Product Features -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Key Features</h5>
+                <div id="productFeatures">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Capital Protection at 70%</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Quarterly Observations</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Early Redemption Feature</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Memory Coupon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <!-- Payoff Diagram -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Payoff Diagram</h5>
+                <div id="payoffChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 150px;">
+                        <i class="fas fa-chart-line results-icon"></i>
+                        <h6>Payoff Structure</h6>
+                        <p>Configure product parameters to see payoff diagram.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario Analysis -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Scenario Analysis</h5>
+                <div class="scenario-grid">
+                    <div class="scenario-card">
+                        <div class="scenario-header bullish">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Bull Market</span>
+                        </div>
+                        <div class="scenario-detail">Underlying +20%</div>
+                        <div class="scenario-return positive">+8.5% p.a.</div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-header neutral">
+                            <i class="fas fa-minus"></i>
+                            <span>Sideways</span>
+                        </div>
+                        <div class="scenario-detail">Underlying ±5%</div>
+                        <div class="scenario-return positive">+8.0% p.a.</div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-header bearish">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Bear Market</span>
+                        </div>
+                        <div class="scenario-detail">Underlying -35%</div>
+                        <div class="scenario-return negative">-35.0%</div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-header volatile">
+                            <i class="fas fa-chart-line"></i>
+                            <span>High Vol</span>
+                        </div>
+                        <div class="scenario-detail">Vol Spike to 40%</div>
+                        <div class="scenario-return warning">+2.5% p.a.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Metrics -->
+            <div class="results-card-modern">
+                <h5 class="results-title">Risk Metrics</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="risk-metric-card">
+                            <div class="metric-label">Fair Value</div>
+                            <div class="metric-value">98.75%</div>
+                            <div class="metric-detail">of notional</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="risk-metric-card">
+                            <div class="metric-label">Expected Return</div>
+                            <div class="metric-value">7.85%</div>
+                            <div class="metric-detail">per annum</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="risk-metric-card">
+                            <div class="metric-label">Prob. of Autocall</div>
+                            <div class="metric-value">65.2%</div>
+                            <div class="metric-detail">within 2 years</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="risk-metric-card">
+                            <div class="metric-label">Barrier Risk</div>
+                            <div class="metric-value">12.8%</div>
+                            <div class="metric-detail">probability</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Structured Products specific styles matching Pricing page */
+.feature-item {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.scenario-card {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.scenario-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+}
+
+.scenario-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.scenario-header.bullish {
+    color: #00ff88;
+}
+
+.scenario-header.neutral {
+    color: #ffa94d;
+}
+
+.scenario-header.bearish {
+    color: #ff6b6b;
+}
+
+.scenario-header.volatile {
+    color: var(--primary);
+}
+
+.scenario-detail {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.scenario-return {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.scenario-return.positive {
+    color: #00ff88;
+}
+
+.scenario-return.negative {
+    color: #ff6b6b;
+}
+
+.scenario-return.warning {
+    color: #ffa94d;
+}
+
+.risk-metric-card {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    color: var(--primary);
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.metric-detail {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+</style>
+
+<script>
+// Structured Products Form
+document.getElementById('structuredForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Display results
+    document.getElementById('structuredResults').innerHTML = `
+        <div class="structured-results">
+            <div class="result-row">
+                <span>Fair Value</span>
+                <strong>98.75%</strong>
+            </div>
+            <div class="result-row">
+                <span>Expected Return</span>
+                <strong>7.85% p.a.</strong>
+            </div>
+            <div class="result-row">
+                <span>Max Loss</span>
+                <strong>-30.00%</strong>
+            </div>
+        </div>
+    `;
+    
+    // Generate payoff diagram
+    generatePayoffDiagram();
+});
+
+// Generate Payoff Diagram
+function generatePayoffDiagram() {
+    const barrierLevel = parseFloat(document.getElementById('barrierLevel').value);
+    const couponRate = parseFloat(document.getElementById('couponRate').value);
+    
+    const spotPrices = [];
+    const payoffs = [];
+    
+    for (let i = 50; i <= 150; i++) {
+        spotPrices.push(i);
+        if (i >= 100) {
+            payoffs.push(couponRate); // Coupon if above initial
+        } else if (i >= barrierLevel) {
+            payoffs.push(0); // Capital protected
+        } else {
+            payoffs.push(i - 100); // Loss below barrier
+        }
+    }
+    
+    const trace = {
+        x: spotPrices,
+        y: payoffs,
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        fillcolor: 'rgba(100, 200, 255, 0.1)',
+        line: {
+            color: '#64c8ff',
+            width: 3
+        }
+    };
+    
+    const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#e0e0e0' },
+        xaxis: {
+            title: 'Underlying Price (%)',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        yaxis: {
+            title: 'Return (%)',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        shapes: [
+            {
+                type: 'line',
+                x0: barrierLevel, x1: barrierLevel,
+                y0: -50, y1: 10,
+                line: {
+                    color: '#ff6b6b',
+                    width: 2,
+                    dash: 'dash'
+                }
+            },
+            {
+                type: 'line',
+                x0: 100, x1: 100,
+                y0: -50, y1: 10,
+                line: {
+                    color: '#00ff88',
+                    width: 2,
+                    dash: 'dash'
+                }
+            }
+        ],
+        annotations: [
+            {
+                x: barrierLevel,
+                y: 12,
+                text: 'Barrier',
+                showarrow: false,
+                font: { color: '#ff6b6b' }
+            },
+            {
+                x: 100,
+                y: 12,
+                text: 'Initial',
+                showarrow: false,
+                font: { color: '#00ff88' }
+            }
+        ],
+        margin: { t: 20, r: 20, b: 50, l: 50 }
+    };
+    
+    Plotly.newPlot('payoffChart', [trace], layout, {responsive: true, displayModeBar: false});
+}
+
+// Reset form
+function resetStructuredForm() {
+    document.getElementById('productType').value = 'autocall';
+    document.getElementById('underlying').value = 'S&P 500';
+    document.getElementById('initialLevel').value = '100';
+    document.getElementById('barrierLevel').value = '70';
+    document.getElementById('couponRate').value = '8';
+    document.getElementById('maturity').value = '3';
+    
+    document.getElementById('structuredResults').innerHTML = '';
+    
+    document.getElementById('payoffChart').innerHTML = `
+        <div class="results-placeholder" style="padding-top: 150px;">
+            <i class="fas fa-chart-line results-icon"></i>
+            <h6>Payoff Structure</h6>
+            <p>Configure product parameters to see payoff diagram.</p>
+        </div>
+    `;
+}
+</script>
+
+<style>
+.structured-results {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-row:last-child {
+    border-bottom: none;
+}
+
+.result-row span {
+    color: var(--text-secondary);
+}
+
+.result-row strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+</style>
+{% endblock %}

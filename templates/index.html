@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}Quantitative Finance Dashboard - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Same style as Pricing page) -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Quantitative Finance</span>
+                    <span class="gradient-text-alt">Dashboard</span>
+                </h1>
+                <p class="hero-subtitle">BLACK-SCHOLES MODEL SUITE</p>
+                <p class="hero-description">
+                    Real-time derivatives pricing, risk analytics, and market data<br>
+                    Professional-grade financial modeling platform.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Left Panel - Quick Calculator -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Quick Calculator</h5>
+                
+                <form id="quickCalcForm">
+                    <div class="input-group-modern">
+                        <label for="quickSpot" class="form-label-modern">Spot Price</label>
+                        <input type="number" class="form-control-modern" id="quickSpot" value="100" step="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="quickStrike" class="form-label-modern">Strike Price</label>
+                        <input type="number" class="form-control-modern" id="quickStrike" value="100" step="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="quickTime" class="form-label-modern">Time to Expiry</label>
+                        <input type="number" class="form-control-modern" id="quickTime" value="0.25" step="0.01">
+                        <span class="input-suffix">years</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="quickRate" class="form-label-modern">Risk-free Rate</label>
+                        <input type="number" class="form-control-modern" id="quickRate" value="5" step="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="quickVol" class="form-label-modern">Volatility</label>
+                        <input type="number" class="form-control-modern" id="quickVol" value="20" step="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-calculate">
+                            <i class="fas fa-calculator me-2"></i>Calculate
+                        </button>
+                    </div>
+                </form>
+
+                <div id="quickResults" class="mt-4"></div>
+            </div>
+
+            <!-- Market Indicators -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Market Indicators</h5>
+                
+                <div class="market-indicator-item">
+                    <div class="indicator-header">
+                        <span class="indicator-name">VIX Index</span>
+                        <span class="indicator-value positive">14.82</span>
+                    </div>
+                    <div class="indicator-change">
+                        <span class="change-value negative">-0.58 (-3.77%)</span>
+                    </div>
+                </div>
+
+                <div class="market-indicator-item">
+                    <div class="indicator-header">
+                        <span class="indicator-name">S&P 500</span>
+                        <span class="indicator-value">4,783.25</span>
+                    </div>
+                    <div class="indicator-change">
+                        <span class="change-value positive">+38.42 (+0.81%)</span>
+                    </div>
+                </div>
+
+                <div class="market-indicator-item">
+                    <div class="indicator-header">
+                        <span class="indicator-name">10Y Treasury</span>
+                        <span class="indicator-value">4.25%</span>
+                    </div>
+                    <div class="indicator-change">
+                        <span class="change-value negative">-0.05 (-1.16%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Dashboard Content -->
+        <div class="col-lg-8">
+            <!-- Quick Access Tools -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Quick Access</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('pricing') }}" class="quick-access-card">
+                            <div class="quick-access-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <div class="quick-access-content">
+                                <h6>Option Pricing</h6>
+                                <p>Black-Scholes, Monte Carlo</p>
+                            </div>
+                            <i class="fas fa-arrow-right quick-access-arrow"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('greeks') }}" class="quick-access-card">
+                            <div class="quick-access-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="quick-access-content">
+                                <h6>Greeks Analysis</h6>
+                                <p>Delta, Gamma, Vega, Theta</p>
+                            </div>
+                            <i class="fas fa-arrow-right quick-access-arrow"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('risk_metrics') }}" class="quick-access-card">
+                            <div class="quick-access-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="quick-access-content">
+                                <h6>Risk Metrics</h6>
+                                <p>VaR, CVaR, Stress Testing</p>
+                            </div>
+                            <i class="fas fa-arrow-right quick-access-arrow"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('monte_carlo') }}" class="quick-access-card">
+                            <div class="quick-access-icon">
+                                <i class="fas fa-dice"></i>
+                            </div>
+                            <div class="quick-access-content">
+                                <h6>Monte Carlo</h6>
+                                <p>Path simulation & analysis</p>
+                            </div>
+                            <i class="fas fa-arrow-right quick-access-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Calculations -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Recent Calculations</h5>
+                <div class="recent-calc-list">
+                    <div class="recent-calc-item">
+                        <div class="calc-icon call">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="calc-details">
+                            <h6>AAPL Call Option</h6>
+                            <p>Strike: $150, Expiry: 30 days</p>
+                            <div class="calc-meta">
+                                <span>Price: $8.45</span>
+                                <span>IV: 28.5%</span>
+                                <span>Delta: 0.65</span>
+                            </div>
+                        </div>
+                        <div class="calc-time">2 min ago</div>
+                    </div>
+
+                    <div class="recent-calc-item">
+                        <div class="calc-icon put">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="calc-details">
+                            <h6>SPX Put Option</h6>
+                            <p>Strike: $4700, Expiry: 7 days</p>
+                            <div class="calc-meta">
+                                <span>Price: $12.30</span>
+                                <span>IV: 15.2%</span>
+                                <span>Delta: -0.35</span>
+                            </div>
+                        </div>
+                        <div class="calc-time">15 min ago</div>
+                    </div>
+
+                    <div class="recent-calc-item">
+                        <div class="calc-icon analysis">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="calc-details">
+                            <h6>Portfolio VaR Analysis</h6>
+                            <p>95% Confidence, 1-Day Horizon</p>
+                            <div class="calc-meta">
+                                <span>VaR: $125,000</span>
+                                <span>CVaR: $182,500</span>
+                            </div>
+                        </div>
+                        <div class="calc-time">1 hour ago</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yield Curve Visualization -->
+            <div class="results-card-modern">
+                <h5 class="results-title">US Treasury Yield Curve</h5>
+                <div id="yieldCurveChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 150px;">
+                        <i class="fas fa-chart-area results-icon"></i>
+                        <h6>Yield Curve</h6>
+                        <p>Loading market data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Market Indicators */
+.market-indicator-item {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.market-indicator-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.indicator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.indicator-value {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.indicator-change {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.change-value {
+    font-size: 0.85rem;
+}
+
+.change-value.positive {
+    color: var(--success);
+}
+
+.change-value.negative {
+    color: var(--danger);
+}
+
+/* Quick Access Cards */
+.quick-access-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-access-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+}
+
+.quick-access-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.quick-access-content {
+    flex: 1;
+}
+
+.quick-access-content h6 {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.quick-access-content p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.quick-access-arrow {
+    color: var(--primary);
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.quick-access-card:hover .quick-access-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Recent Calculations */
+.recent-calc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.recent-calc-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.recent-calc-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.calc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.calc-icon.call {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+}
+
+.calc-icon.put {
+    background: linear-gradient(135deg, #ff6b6b, #ff5252);
+}
+
+.calc-icon.analysis {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+}
+
+.calc-details {
+    flex: 1;
+}
+
+.calc-details h6 {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.calc-details p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.calc-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+}
+
+.calc-meta span {
+    color: var(--primary);
+}
+
+.calc-time {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Quick Results */
+.quick-result-display {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.quick-result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-result-row:last-child {
+    border-bottom: none;
+}
+
+.quick-result-label {
+    color: var(--text-secondary);
+}
+
+.quick-result-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+</style>
+
+<script>
+// Quick Calculator
+document.getElementById('quickCalcForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const data = {
+        spot_price: parseFloat(document.getElementById('quickSpot').value),
+        strike_price: parseFloat(document.getElementById('quickStrike').value),
+        time_to_expiry: parseFloat(document.getElementById('quickTime').value),
+        risk_free_rate: parseFloat(document.getElementById('quickRate').value) / 100,
+        volatility: parseFloat(document.getElementById('quickVol').value) / 100,
+        option_type: 'call'
+    };
+    
+    // Clear previous results
+    document.getElementById('quickResults').innerHTML = '';
+    
+    fetch('/api/calculate-option', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('quickResults').innerHTML = `
+                <div class="quick-result-display">
+                    <div class="quick-result-row">
+                        <span class="quick-result-label">Call Price</span>
+                        <span class="quick-result-value">$${result.prices.call_price}</span>
+                    </div>
+                    <div class="quick-result-row">
+                        <span class="quick-result-label">Put Price</span>
+                        <span class="quick-result-value">$${result.prices.put_price}</span>
+                    </div>
+                    <div class="quick-result-row">
+                        <span class="quick-result-label">Delta (Call)</span>
+                        <span class="quick-result-value">${result.greeks.call.delta}</span>
+                    </div>
+                    <div class="quick-result-row">
+                        <span class="quick-result-label">Vega</span>
+                        <span class="quick-result-value">${result.greeks.call.vega}</span>
+                    </div>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('quickResults').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Calculation error</p>
+            </div>
+        `;
+    });
+});
+
+// Initialize Yield Curve Chart
+document.addEventListener('DOMContentLoaded', function() {
+    // Simulated yield curve data
+    const yieldData = {
+        x: ['1M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '20Y', '30Y'],
+        y: [4.50, 4.55, 4.60, 4.45, 4.20, 4.10, 4.05, 4.10, 4.25, 4.45, 4.50],
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Current',
+        line: {
+            color: '#64c8ff',
+            width: 3
+        },
+        marker: {
+            color: '#64c8ff',
+            size: 8
+        },
+        fill: 'tozeroy',
+        fillcolor: 'rgba(100, 200, 255, 0.1)'
+    };
+    
+    const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#e0e0e0' },
+        xaxis: {
+            title: 'Maturity',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            zerolinecolor: 'rgba(255, 255, 255, 0.2)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        yaxis: {
+            title: 'Yield (%)',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            zerolinecolor: 'rgba(255, 255, 255, 0.2)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        margin: { t: 20, r: 20, b: 50, l: 50 },
+        hoverlabel: {
+            bgcolor: 'rgba(0, 0, 0, 0.8)',
+            font: { color: 'white' }
+        }
+    };
+    
+    const config = {
+        responsive: true,
+        displayModeBar: false
+    };
+    
+    Plotly.newPlot('yieldCurveChart', [yieldData], layout, config);
+});
+</script>
+{% endblock %}

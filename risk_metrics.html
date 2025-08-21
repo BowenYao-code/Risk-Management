@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Metrics - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Same style as Pricing page) -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Risk Metrics</span>
+                    <span class="gradient-text-alt">Analysis</span>
+                </h1>
+                <p class="hero-subtitle">VALUE AT RISK & STRESS TESTING</p>
+                <p class="hero-description">
+                    Comprehensive risk measurement and scenario analysis<br>
+                    Professional portfolio risk management tools.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">VaR Calculator</h5>
+                
+                <form id="varForm">
+                    <div class="input-group-modern">
+                        <label for="portfolioValue" class="form-label-modern">Portfolio Value</label>
+                        <input type="number" class="form-control-modern" id="portfolioValue" value="1000000" step="1000">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="confidenceLevel" class="form-label-modern">Confidence Level</label>
+                        <select class="form-control-modern" id="confidenceLevel">
+                            <option value="90">90%</option>
+                            <option value="95" selected>95%</option>
+                            <option value="99">99%</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="timeHorizon" class="form-label-modern">Time Horizon</label>
+                        <input type="number" class="form-control-modern" id="timeHorizon" value="1" min="1" max="252">
+                        <span class="input-suffix">days</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="portfolioVol" class="form-label-modern">Portfolio Volatility</label>
+                        <input type="number" class="form-control-modern" id="portfolioVol" value="20" step="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="varMethod" class="form-label-modern">Calculation Method</label>
+                        <select class="form-control-modern" id="varMethod">
+                            <option value="parametric">Parametric</option>
+                            <option value="historical">Historical</option>
+                            <option value="montecarlo">Monte Carlo</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-calculate">
+                            <i class="fas fa-chart-bar me-2"></i>Calculate VaR
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetVarForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+
+                <div id="varResults" class="mt-4"></div>
+            </div>
+
+            <!-- Risk Indicators -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Risk Overview</h5>
+                
+                <div class="risk-indicator-item">
+                    <div class="risk-label">Portfolio Beta</div>
+                    <div class="risk-value">1.25</div>
+                    <div class="risk-bar">
+                        <div class="risk-bar-fill" style="width: 62.5%;"></div>
+                    </div>
+                </div>
+
+                <div class="risk-indicator-item">
+                    <div class="risk-label">Sharpe Ratio</div>
+                    <div class="risk-value">1.85</div>
+                    <div class="risk-bar">
+                        <div class="risk-bar-fill success" style="width: 92.5%;"></div>
+                    </div>
+                </div>
+
+                <div class="risk-indicator-item">
+                    <div class="risk-label">Max Drawdown</div>
+                    <div class="risk-value">-12.3%</div>
+                    <div class="risk-bar">
+                        <div class="risk-bar-fill danger" style="width: 30.75%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <!-- VaR Distribution -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">VaR Distribution Analysis</h5>
+                <div id="varChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 150px;">
+                        <i class="fas fa-chart-area results-icon"></i>
+                        <h6>Distribution Chart</h6>
+                        <p>Calculate VaR to see P&L distribution and risk metrics.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stress Testing Scenarios -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Stress Testing Scenarios</h5>
+                <div class="stress-test-grid">
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Market Crash</span>
+                        </div>
+                        <div class="scenario-impact">-20% equity shock</div>
+                        <div class="scenario-result negative">-$285,000</div>
+                    </div>
+
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-percentage"></i>
+                            <span>Rate Hike</span>
+                        </div>
+                        <div class="scenario-impact">+200bps shift</div>
+                        <div class="scenario-result negative">-$125,000</div>
+                    </div>
+
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-bolt"></i>
+                            <span>Vol Spike</span>
+                        </div>
+                        <div class="scenario-impact">VIX to 40</div>
+                        <div class="scenario-result negative">-$95,000</div>
+                    </div>
+
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-university"></i>
+                            <span>Credit Event</span>
+                        </div>
+                        <div class="scenario-impact">Spreads +100bps</div>
+                        <div class="scenario-result negative">-$65,000</div>
+                    </div>
+
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>FX Shock</span>
+                        </div>
+                        <div class="scenario-impact">USD -10%</div>
+                        <div class="scenario-result positive">+$45,000</div>
+                    </div>
+
+                    <div class="stress-scenario">
+                        <div class="scenario-header">
+                            <i class="fas fa-globe"></i>
+                            <span>Combined</span>
+                        </div>
+                        <div class="scenario-impact">All scenarios</div>
+                        <div class="scenario-result negative">-$485,000</div>
+                    </div>
+                </div>
+                
+                <button class="btn-modern btn-secondary-modern w-100 mt-3" onclick="runCustomStressTest()">
+                    <i class="fas fa-play me-2"></i>Run Custom Stress Test
+                </button>
+            </div>
+
+            <!-- Risk Metrics Summary -->
+            <div class="results-card-modern">
+                <h5 class="results-title">Risk Metrics Summary</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Value at Risk (95%)</span>
+                            </div>
+                            <div class="metric-value" id="varValue">$125,000</div>
+                            <div class="metric-detail">1-day horizon</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>CVaR (95%)</span>
+                            </div>
+                            <div class="metric-value" id="cvarValue">$182,500</div>
+                            <div class="metric-detail">Expected shortfall</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>PFE (1Y)</span>
+                            </div>
+                            <div class="metric-value">$450,000</div>
+                            <div class="metric-detail">Peak exposure</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-university"></i>
+                                <span>CVA</span>
+                            </div>
+                            <div class="metric-value">$28,750</div>
+                            <div class="metric-detail">Credit adjustment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Risk Indicators */
+.risk-indicator-item {
+    margin-bottom: 1.5rem;
+}
+
+.risk-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.risk-value {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.risk-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.risk-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.risk-bar-fill.success {
+    background: linear-gradient(90deg, #00ff88, #00cc6a);
+}
+
+.risk-bar-fill.danger {
+    background: linear-gradient(90deg, #ff6b6b, #ff5252);
+}
+
+/* Stress Testing Grid */
+.stress-test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stress-scenario {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stress-scenario:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.scenario-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.scenario-impact {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.scenario-result {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.scenario-result.positive {
+    color: var(--success);
+}
+
+.scenario-result.negative {
+    color: var(--danger);
+}
+
+/* Metric Cards */
+.metric-card {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.metric-value {
+    color: var(--primary);
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-detail {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* VaR Results */
+.var-result-display {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.var-result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.var-result-row:last-child {
+    border-bottom: none;
+}
+
+.var-result-label {
+    color: var(--text-secondary);
+}
+
+.var-result-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+</style>
+
+<script>
+// VaR Calculator
+document.getElementById('varForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const portfolioValue = parseFloat(document.getElementById('portfolioValue').value);
+    const confidence = parseFloat(document.getElementById('confidenceLevel').value) / 100;
+    const timeHorizon = parseFloat(document.getElementById('timeHorizon').value);
+    const volatility = parseFloat(document.getElementById('portfolioVol').value) / 100;
+    const method = document.getElementById('varMethod').value;
+    
+    // Calculate VaR (simplified parametric method)
+    const zScore = confidence === 0.90 ? 1.282 : confidence === 0.95 ? 1.645 : 2.326;
+    const dailyVol = volatility / Math.sqrt(252);
+    const periodVol = dailyVol * Math.sqrt(timeHorizon);
+    const var95 = portfolioValue * zScore * periodVol;
+    const cvar95 = var95 * 1.4; // Simplified CVaR calculation
+    
+    // Display results
+    document.getElementById('varResults').innerHTML = `
+        <div class="var-result-display">
+            <div class="var-result-row">
+                <span class="var-result-label">VaR (${(confidence*100).toFixed(0)}%)</span>
+                <span class="var-result-value">$${var95.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span>
+            </div>
+            <div class="var-result-row">
+                <span class="var-result-label">CVaR (${(confidence*100).toFixed(0)}%)</span>
+                <span class="var-result-value">$${cvar95.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span>
+            </div>
+            <div class="var-result-row">
+                <span class="var-result-label">% of Portfolio</span>
+                <span class="var-result-value">${(var95/portfolioValue*100).toFixed(2)}%</span>
+            </div>
+        </div>
+    `;
+    
+    // Update main display
+    document.getElementById('varValue').textContent = `$${var95.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    document.getElementById('cvarValue').textContent = `$${cvar95.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    
+    // Update chart
+    updateVaRChart(portfolioValue, var95, cvar95);
+});
+
+// Update VaR Chart
+function updateVaRChart(portfolioValue, var95, cvar95) {
+    // Generate normal distribution
+    const x = [];
+    const y = [];
+    const mean = 0;
+    const std = var95 / 1.645;
+    
+    for (let i = -3*std; i <= 3*std; i += std/50) {
+        x.push(i);
+        y.push((1/Math.sqrt(2*Math.PI*std*std)) * Math.exp(-0.5*Math.pow((i-mean)/std, 2)));
+    }
+    
+    const trace1 = {
+        x: x,
+        y: y,
+        type: 'scatter',
+        mode: 'lines',
+        name: 'P&L Distribution',
+        fill: 'tozeroy',
+        fillcolor: 'rgba(100, 200, 255, 0.1)',
+        line: {
+            color: '#64c8ff',
+            width: 2
+        }
+    };
+    
+    const trace2 = {
+        x: [-var95, -var95],
+        y: [0, Math.max(...y)],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'VaR',
+        line: {
+            color: '#ff6b6b',
+            width: 2,
+            dash: 'dash'
+        }
+    };
+    
+    const trace3 = {
+        x: [-cvar95, -cvar95],
+        y: [0, Math.max(...y)],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'CVaR',
+        line: {
+            color: '#ffa94d',
+            width: 2,
+            dash: 'dash'
+        }
+    };
+    
+    const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#e0e0e0' },
+        xaxis: {
+            title: 'P&L ($)',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            zerolinecolor: 'rgba(255, 255, 255, 0.2)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        yaxis: {
+            title: 'Probability Density',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            zerolinecolor: 'rgba(255, 255, 255, 0.2)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        showlegend: true,
+        legend: {
+            x: 0.7,
+            y: 1,
+            bgcolor: 'transparent',
+            font: { color: '#e0e0e0' }
+        },
+        margin: { t: 20, r: 20, b: 50, l: 50 },
+        hoverlabel: {
+            bgcolor: 'rgba(0, 0, 0, 0.8)',
+            font: { color: 'white' }
+        }
+    };
+    
+    const config = {
+        responsive: true,
+        displayModeBar: false
+    };
+    
+    Plotly.newPlot('varChart', [trace1, trace2, trace3], layout, config);
+}
+
+// Initialize with default values
+document.addEventListener('DOMContentLoaded', function() {
+    updateVaRChart(1000000, 164500, 230300);
+});
+
+// Reset form
+function resetVarForm() {
+    document.getElementById('portfolioValue').value = '1000000';
+    document.getElementById('confidenceLevel').value = '95';
+    document.getElementById('timeHorizon').value = '1';
+    document.getElementById('portfolioVol').value = '20';
+    document.getElementById('varMethod').value = 'parametric';
+    document.getElementById('varResults').innerHTML = '';
+}
+
+// Custom stress test
+function runCustomStressTest() {
+    alert('Custom stress test configuration will be available soon!');
+}
+</script>
+{% endblock %}

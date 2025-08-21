@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Analysis - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Risk</span>
+                    <span class="gradient-text-alt">Management</span>
+                </h1>
+                <p class="hero-subtitle">PORTFOLIO ANALYSIS</p>
+                <p class="hero-description">
+                    Advanced P&L scenarios and sensitivity analysis<br>
+                    for comprehensive risk assessment.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Risk Parameters</h5>
+                
+                <form id="riskForm">
+                    <div class="input-group-modern">
+                        <label for="riskSpot" class="form-label-modern">Current Spot Price</label>
+                        <input type="number" class="form-control-modern" id="riskSpot" value="100" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="riskStrike" class="form-label-modern">Strike Price</label>
+                        <input type="number" class="form-control-modern" id="riskStrike" value="105" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="riskTime" class="form-label-modern">Time to Expiry</label>
+                        <input type="number" class="form-control-modern" id="riskTime" value="0.25" step="0.01" min="0.01">
+                        <span class="input-suffix">years</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="riskRate" class="form-label-modern">Risk-free Rate</label>
+                        <input type="number" class="form-control-modern" id="riskRate" value="5" step="0.1" min="0">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="riskVol" class="form-label-modern">Volatility</label>
+                        <input type="number" class="form-control-modern" id="riskVol" value="20" step="0.1" min="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="optionTypeRisk" class="form-label-modern">Option Type</label>
+                        <select class="form-control-modern" id="optionTypeRisk">
+                            <option value="call">Call Option</option>
+                            <option value="put">Put Option</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="premiumPaid" class="form-label-modern">Premium Paid (Optional)</label>
+                        <input type="number" class="form-control-modern" id="premiumPaid" placeholder="Auto-calculate" step="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="button" class="btn-modern btn-calculate" onclick="generatePnLAnalysis()">
+                            <i class="fas fa-chart-line me-2"></i>Generate P&L Analysis
+                        </button>
+                        <button type="button" class="btn-modern btn-secondary-modern" onclick="runSensitivityAnalysis()">
+                            <i class="fas fa-search me-2"></i>Sensitivity Analysis
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetRiskForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Risk Metrics Summary -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Risk Metrics</h5>
+                <div id="riskMetrics">
+                    <div class="results-placeholder">
+                        <i class="fas fa-tachometer-alt results-icon"></i>
+                        <h6>Risk Dashboard</h6>
+                        <p>Risk metrics and indicators will appear here after analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="col-lg-8">
+            <!-- P&L Analysis Chart -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Profit & Loss Analysis</h5>
+                <div id="pnlChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 120px;">
+                        <i class="fas fa-chart-line results-icon"></i>
+                        <h6>P&L Scenarios</h6>
+                        <p>Generate analysis to view profit/loss scenarios across different spot prices and understand risk exposure.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensitivity Analysis -->
+            <div class="results-card-modern">
+                <h5 class="results-title">Parameter Sensitivity Analysis</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <select class="form-control-modern" id="sensitivityParameter">
+                            <option value="S">Spot Price Sensitivity</option>
+                            <option value="sigma">Volatility Sensitivity</option>
+                            <option value="T">Time Sensitivity</option>
+                            <option value="r">Interest Rate Sensitivity</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn-modern btn-tertiary-modern w-100" onclick="generateSensitivityChart()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Chart
+                        </button>
+                    </div>
+                </div>
+                <div id="sensitivityChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 120px;">
+                        <i class="fas fa-search results-icon"></i>
+                        <h6>Sensitivity Analysis</h6>
+                        <p>Select a parameter and generate analysis to see how option values change with parameter variations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentRiskParams = {};
+
+function generatePnLAnalysis() {
+    const data = {
+        spot_price: parseFloat(document.getElementById('riskSpot').value),
+        strike_price: parseFloat(document.getElementById('riskStrike').value),
+        time_to_expiry: parseFloat(document.getElementById('riskTime').value),
+        risk_free_rate: parseFloat(document.getElementById('riskRate').value) / 100,
+        volatility: parseFloat(document.getElementById('riskVol').value) / 100,
+        option_type: document.getElementById('optionTypeRisk').value
+    };
+
+    const premiumPaid = document.getElementById('premiumPaid').value;
+    if (premiumPaid) {
+        data.premium_paid = parseFloat(premiumPaid);
+    }
+
+    currentRiskParams = data;
+
+    // Clear previous content
+    document.getElementById('pnlChart').innerHTML = '';
+
+    fetch('/api/pnl-analysis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const plotData = JSON.parse(result.chart);
+            Plotly.newPlot('pnlChart', plotData.data, plotData.layout, {
+                displayModeBar: true,
+                responsive: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+            });
+            updateRiskMetrics(data);
+        } else {
+            document.getElementById('pnlChart').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Generation Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('pnlChart').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server. Please try again.</p>
+            </div>
+        `;
+    });
+}
+
+function runSensitivityAnalysis() {
+    if (!currentRiskParams.spot_price) {
+        document.getElementById('sensitivityChart').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Missing Parameters</h6>
+                <p>Please generate P&L analysis first to set base parameters.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Clear previous content
+    document.getElementById('sensitivityChart').innerHTML = '';
+
+    fetch('/api/sensitivity-analysis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(currentRiskParams)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            displaySensitivityResults(result.results);
+        } else {
+            document.getElementById('sensitivityChart').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Analysis Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('sensitivityChart').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server. Please try again.</p>
+            </div>
+        `;
+    });
+}
+
+function displaySensitivityResults(results) {
+    const parameter = document.getElementById('sensitivityParameter').value;
+    const paramData = results.filter(r => r.parameter === parameter);
+    
+    console.log('Parameter:', parameter);
+    console.log('Filtered data:', paramData);
+    console.log('All results:', results);
+    
+    if (paramData.length === 0) {
+        document.getElementById('sensitivityChart').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>No Data</h6>
+                <p>No data available for selected parameter: ${parameter}</p>
+                <small>Available parameters: ${[...new Set(results.map(r => r.parameter))].join(', ')}</small>
+            </div>
+        `;
+        return;
+    }
+
+    const trace1 = {
+        x: paramData.map(d => d.value),
+        y: paramData.map(d => d.price),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Option Price',
+        line: { color: '#667eea', width: 3 },
+        hovertemplate: '<b>%{xaxis.title.text}</b>: %{x}<br><b>Option Price</b>: $%{y:.4f}<extra></extra>'
+    };
+
+    const trace2 = {
+        x: paramData.map(d => d.value),
+        y: paramData.map(d => d.delta),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Delta',
+        yaxis: 'y2',
+        line: { color: '#4ade80', width: 3 },
+        hovertemplate: '<b>%{xaxis.title.text}</b>: %{x}<br><b>Delta</b>: %{y:.4f}<extra></extra>'
+    };
+
+    const layout = {
+        title: {
+            text: `Sensitivity to ${getParameterName(parameter)}`,
+            font: { color: 'white', size: 16 },
+            x: 0.5
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        xaxis: { 
+            title: {
+                text: getParameterLabel(parameter),
+                font: { color: 'white' }
+            },
+            tickfont: { color: 'white' },
+            gridcolor: 'rgba(255,255,255,0.1)',
+            zerolinecolor: 'rgba(255,255,255,0.2)'
+        },
+        yaxis: { 
+            title: {
+                text: 'Option Price ($)',
+                font: { color: 'white' }
+            },
+            side: 'left',
+            tickfont: { color: 'white' },
+            gridcolor: 'rgba(255,255,255,0.1)',
+            zerolinecolor: 'rgba(255,255,255,0.2)'
+        },
+        yaxis2: {
+            title: {
+                text: 'Delta',
+                font: { color: 'white' }
+            },
+            side: 'right',
+            overlaying: 'y',
+            tickfont: { color: 'white' }
+        },
+        hovermode: 'x unified',
+        font: { color: 'white' },
+        legend: {
+            bgcolor: 'rgba(255,255,255,0.1)',
+            bordercolor: 'rgba(255,255,255,0.2)',
+            borderwidth: 1,
+            font: { color: 'white' }
+        }
+    };
+
+    Plotly.newPlot('sensitivityChart', [trace1, trace2], layout, {
+        displayModeBar: true,
+        responsive: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+    });
+}
+
+function generateSensitivityChart() {
+    // This function is called by the "Generate Chart" button
+    // It should run the sensitivity analysis with current parameters
+    runSensitivityAnalysis();
+}
+
+function updateRiskMetrics(params) {
+    const moneyness = params.spot_price / params.strike_price;
+    const timeToExpiry = params.time_to_expiry * 365; // days
+    
+    const html = `
+        <div class="results-success">
+            <div class="risk-overview-section mb-4">
+                <h6 class="risk-section-title">Position Overview</h6>
+                <div class="risk-metrics-grid">
+                    <div class="risk-metric-item">
+                        <div class="risk-metric-label">Option Type</div>
+                        <div class="risk-metric-value">${params.option_type.charAt(0).toUpperCase() + params.option_type.slice(1)}</div>
+                    </div>
+                    <div class="risk-metric-item">
+                        <div class="risk-metric-label">Moneyness</div>
+                        <div class="risk-metric-value">${moneyness.toFixed(4)}</div>
+                        <div class="risk-metric-meta">${getMoneynessDescription(moneyness)}</div>
+                    </div>
+                    <div class="risk-metric-item">
+                        <div class="risk-metric-label">Days to Expiry</div>
+                        <div class="risk-metric-value">${Math.round(timeToExpiry)}</div>
+                        <div class="risk-metric-meta">calendar days</div>
+                    </div>
+                    <div class="risk-metric-item">
+                        <div class="risk-metric-label">Implied Vol</div>
+                        <div class="risk-metric-value">${(params.volatility * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="risk-indicators-section">
+                <h6 class="risk-section-title">Risk Indicators</h6>
+                <div class="risk-indicator ${timeToExpiry < 30 ? 'risk-high' : timeToExpiry < 90 ? 'risk-medium' : 'risk-low'}">
+                    <div class="risk-indicator-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="risk-indicator-content">
+                        <div class="risk-indicator-title">Time Decay Risk</div>
+                        <div class="risk-indicator-desc">
+                            ${timeToExpiry < 30 ? 'HIGH - Rapid time decay expected' : 
+                              timeToExpiry < 90 ? 'MEDIUM - Moderate time decay' : 
+                              'LOW - Time decay less significant'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="risk-indicator ${params.volatility > 0.3 ? 'risk-high' : params.volatility > 0.2 ? 'risk-medium' : 'risk-low'}">
+                    <div class="risk-indicator-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="risk-indicator-content">
+                        <div class="risk-indicator-title">Volatility Risk</div>
+                        <div class="risk-indicator-desc">
+                            ${params.volatility > 0.3 ? 'HIGH - Very volatile underlying' : 
+                              params.volatility > 0.2 ? 'MEDIUM - Moderate volatility' : 
+                              'LOW - Low volatility environment'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('riskMetrics').innerHTML = html;
+}
+
+function getMoneynessDescription(moneyness) {
+    if (moneyness > 1.05) return 'In-the-money';
+    if (moneyness < 0.95) return 'Out-of-the-money';
+    return 'At-the-money';
+}
+
+function getParameterName(param) {
+    const names = {
+        'S': 'Spot Price',
+        'sigma': 'Volatility', 
+        'T': 'Time to Expiry',
+        'r': 'Risk-free Rate'
+    };
+    return names[param] || param;
+}
+
+function getParameterLabel(param) {
+    const labels = {
+        'S': 'Spot Price ($)',
+        'sigma': 'Volatility',
+        'T': 'Time to Expiry (years)',
+        'r': 'Risk-free Rate'
+    };
+    return labels[param] || param;
+}
+
+function resetRiskForm() {
+    document.getElementById('riskSpot').value = '100';
+    document.getElementById('riskStrike').value = '105';
+    document.getElementById('riskTime').value = '0.25';
+    document.getElementById('riskRate').value = '5';
+    document.getElementById('riskVol').value = '20';
+    document.getElementById('optionTypeRisk').value = 'call';
+    document.getElementById('premiumPaid').value = '';
+    
+    document.getElementById('pnlChart').innerHTML = `
+        <div class="results-placeholder" style="padding-top: 120px;">
+            <i class="fas fa-chart-line results-icon"></i>
+            <h6>P&L Scenarios</h6>
+            <p>Generate analysis to view profit/loss scenarios across different spot prices and understand risk exposure.</p>
+        </div>
+    `;
+    
+    document.getElementById('sensitivityChart').innerHTML = `
+        <div class="results-placeholder" style="padding-top: 120px;">
+            <i class="fas fa-search results-icon"></i>
+            <h6>Sensitivity Analysis</h6>
+            <p>Select a parameter and generate analysis to see how option values change with parameter variations.</p>
+        </div>
+    `;
+    
+    document.getElementById('riskMetrics').innerHTML = `
+        <div class="results-placeholder">
+            <i class="fas fa-tachometer-alt results-icon"></i>
+            <h6>Risk Dashboard</h6>
+            <p>Risk metrics and indicators will appear here after analysis.</p>
+        </div>
+    `;
+    
+    currentRiskParams = {};
+}
+
+// Remove auto-initialization to avoid loading issues
+</script>
+{% endblock %}

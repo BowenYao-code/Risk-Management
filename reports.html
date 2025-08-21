@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Same style as Pricing page) -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Report</span>
+                    <span class="gradient-text-alt">Center</span>
+                </h1>
+                <p class="hero-subtitle">ANALYSIS & DOCUMENTATION</p>
+                <p class="hero-description">
+                    Generate comprehensive financial reports and analysis<br>
+                    Export to PDF, Excel, and HTML formats.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Report Configuration</h5>
+                
+                <form id="reportForm">
+                    <div class="input-group-modern">
+                        <label for="reportName" class="form-label-modern">Report Name</label>
+                        <input type="text" class="form-control-modern" id="reportName" placeholder="Q4 2024 Analysis">
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="reportType" class="form-label-modern">Report Type</label>
+                        <select class="form-control-modern" id="reportType">
+                            <option value="portfolio">Portfolio Analysis</option>
+                            <option value="option">Option Valuation</option>
+                            <option value="risk">Risk Report</option>
+                            <option value="market">Market Analysis</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="dateRange" class="form-label-modern">Date Range</label>
+                        <select class="form-control-modern" id="dateRange">
+                            <option value="1d">1 Day</option>
+                            <option value="1w">1 Week</option>
+                            <option value="1m" selected>1 Month</option>
+                            <option value="3m">3 Months</option>
+                            <option value="1y">1 Year</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="exportFormat" class="form-label-modern">Export Format</label>
+                        <select class="form-control-modern" id="exportFormat">
+                            <option value="pdf">PDF Document</option>
+                            <option value="excel">Excel Spreadsheet</option>
+                            <option value="html">HTML Report</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-calculate">
+                            <i class="fas fa-file-export me-2"></i>Generate Report
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetReportForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Report Templates -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Quick Templates</h5>
+                <div class="template-list">
+                    <div class="template-item" onclick="loadTemplate('daily')">
+                        <i class="fas fa-calendar-day me-2"></i>
+                        <span>Daily Summary</span>
+                    </div>
+                    <div class="template-item" onclick="loadTemplate('portfolio')">
+                        <i class="fas fa-briefcase me-2"></i>
+                        <span>Portfolio Report</span>
+                    </div>
+                    <div class="template-item" onclick="loadTemplate('risk')">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <span>Risk Analysis</span>
+                    </div>
+                    <div class="template-item" onclick="loadTemplate('performance')">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span>Performance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <!-- Report Preview -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Report Preview</h5>
+                <div id="reportPreview">
+                    <div class="preview-header">
+                        <h4>Portfolio Risk Analysis Report</h4>
+                        <p class="text-muted">Generated: December 2024</p>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h6 class="preview-section-title">Executive Summary</h6>
+                        <p class="preview-text">
+                            Portfolio demonstrates strong risk-adjusted returns with VaR within acceptable limits.
+                            Current market conditions suggest maintaining defensive positioning.
+                        </p>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h6 class="preview-section-title">Key Metrics</h6>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Portfolio Value</span>
+                                <span class="metric-value">$2,450,000</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">95% VaR</span>
+                                <span class="metric-value">$125,000</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Sharpe Ratio</span>
+                                <span class="metric-value">1.85</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Max Drawdown</span>
+                                <span class="metric-value">-12.3%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h6 class="preview-section-title">Charts & Analysis</h6>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-area fa-3x"></i>
+                            <p>Risk distribution and sensitivity charts will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Reports -->
+            <div class="results-card-modern">
+                <h5 class="results-title">Recent Reports</h5>
+                <div class="reports-list">
+                    <div class="report-item">
+                        <div class="report-icon pdf">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="report-details">
+                            <h6>Q3 2024 Portfolio Analysis</h6>
+                            <p>Generated: 2024-10-01 | Size: 2.4 MB</p>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn-icon" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn-icon" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-item">
+                        <div class="report-icon excel">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="report-details">
+                            <h6>Option Greeks Analysis</h6>
+                            <p>Generated: 2024-09-15 | Size: 1.8 MB</p>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn-icon" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn-icon" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-item">
+                        <div class="report-icon html">
+                            <i class="fas fa-file-code"></i>
+                        </div>
+                        <div class="report-details">
+                            <h6>Market Volatility Report</h6>
+                            <p>Generated: 2024-09-01 | Size: 3.1 MB</p>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn-icon" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn-icon" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Reports specific styles matching Pricing page */
+.template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.template-item {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+}
+
+.template-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+    color: var(--primary);
+}
+
+/* Report Preview */
+#reportPreview {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem;
+    min-height: 400px;
+}
+
+.preview-header {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.preview-header h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.preview-section {
+    margin-bottom: 2rem;
+}
+
+.preview-section-title {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.preview-text {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.metric-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.chart-placeholder {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Reports List */
+.reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.report-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.report-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.report-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.report-icon.pdf {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+}
+
+.report-icon.excel {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+}
+
+.report-icon.html {
+    background: rgba(255, 169, 77, 0.2);
+    color: #ffa94d;
+}
+
+.report-details {
+    flex: 1;
+}
+
+.report-details h6 {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.report-details p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: rgba(100, 200, 255, 0.1);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+</style>
+
+<script>
+// Report form submission
+document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const reportName = document.getElementById('reportName').value || 'Untitled Report';
+    const reportType = document.getElementById('reportType').value;
+    const format = document.getElementById('exportFormat').value;
+    
+    // Show loading state
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    btn.disabled = true;
+    
+    // Simulate report generation
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // Show success message
+        alert('Report generated successfully!');
+        
+        // Update preview
+        updatePreview(reportName, reportType);
+    }, 2000);
+});
+
+// Update preview
+function updatePreview(name, type) {
+    const typeNames = {
+        'portfolio': 'Portfolio Analysis',
+        'option': 'Option Valuation',
+        'risk': 'Risk Report',
+        'market': 'Market Analysis'
+    };
+    
+    document.querySelector('#reportPreview h4').textContent = name;
+    document.querySelector('.preview-section-title').textContent = `${typeNames[type]} Summary`;
+}
+
+// Load template
+function loadTemplate(template) {
+    document.getElementById('reportName').value = `${template.charAt(0).toUpperCase() + template.slice(1)} Report`;
+    
+    // Highlight selected template
+    document.querySelectorAll('.template-item').forEach(item => {
+        item.style.background = 'rgba(255, 255, 255, 0.03)';
+    });
+    event.currentTarget.style.background = 'rgba(100, 200, 255, 0.1)';
+}
+
+// Reset form
+function resetReportForm() {
+    document.getElementById('reportName').value = '';
+    document.getElementById('reportType').value = 'portfolio';
+    document.getElementById('dateRange').value = '1m';
+    document.getElementById('exportFormat').value = 'pdf';
+}
+</script>
+{% endblock %}

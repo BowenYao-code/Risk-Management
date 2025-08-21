@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Management Platform - Bowen Yao</title>
+    <meta name="description" content="Professional Black-Scholes option pricing and risk management platform">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Plotly for charts -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-chart-line me-2"></i>Risk Management Platform
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#greeks">Greeks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#risk">Risk Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="hero-background"></div>
+        <div class="hero-content">
+            <div class="container text-center">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="gradient-text">Quantitative Finance.</span>
+                        <span class="gradient-text-alt">Strategy.</span>
+                        <span class="gradient-text">Impact.</span>
+                    </h1>
+                    <p class="hero-subtitle">THE ANALYTICS AI.</p>
+                    <p class="hero-description">
+                        I turn complexity into clarity.<br>
+                        I solve financial problems by building reusable pricing systems.
+                    </p>
+                    
+                    <div class="hero-buttons">
+                        <a href="#pricing" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-calculator"></i>
+                            Explore Pricing Model
+                        </a>
+                        <a href="#greeks" class="btn-modern btn-secondary-modern">
+                            <i class="fas fa-chart-area"></i>
+                            View Analytics
+                        </a>
+                        <a href="#risk" class="btn-modern btn-tertiary-modern">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Risk Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section-padding">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Black-Scholes Option Pricing</h2>
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="calculator-card">
+                        <h4 class="mb-4">Input Parameters</h4>
+                        <form id="pricingForm">
+                            <div class="input-group-modern mb-3">
+                                <label>Spot Price ($)</label>
+                                <input type="number" class="form-control-modern" id="spotPrice" value="100" step="0.01">
+                            </div>
+                            <div class="input-group-modern mb-3">
+                                <label>Strike Price ($)</label>
+                                <input type="number" class="form-control-modern" id="strikePrice" value="100" step="0.01">
+                            </div>
+                            <div class="input-group-modern mb-3">
+                                <label>Time to Expiry (years)</label>
+                                <input type="number" class="form-control-modern" id="timeToExpiry" value="0.25" step="0.01">
+                            </div>
+                            <div class="input-group-modern mb-3">
+                                <label>Risk-free Rate (%)</label>
+                                <input type="number" class="form-control-modern" id="riskFreeRate" value="5" step="0.1">
+                            </div>
+                            <div class="input-group-modern mb-3">
+                                <label>Volatility (%)</label>
+                                <input type="number" class="form-control-modern" id="volatility" value="20" step="0.1">
+                            </div>
+                            <button type="button" class="btn-modern btn-calculate w-100" onclick="calculateOption()">
+                                <i class="fas fa-calculator me-2"></i>Calculate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="results-card-modern">
+                        <h4 class="results-title">Results</h4>
+                        <div id="pricingResults">
+                            <div class="results-placeholder">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <p>Enter parameters and click Calculate to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Greeks Section -->
+    <section id="greeks" class="section-padding bg-dark">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Greeks Analysis</h2>
+            <div class="row">
+                <div class="col-12">
+                    <div class="results-card-modern">
+                        <div id="greeksChart"></div>
+                        <div class="row mt-4" id="greeksValues">
+                            <div class="col-md-2 text-center">
+                                <div class="greek-card">
+                                    <h5>Delta</h5>
+                                    <p class="greek-value" id="deltaValue">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <div class="greek-card">
+                                    <h5>Gamma</h5>
+                                    <p class="greek-value" id="gammaValue">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <div class="greek-card">
+                                    <h5>Theta</h5>
+                                    <p class="greek-value" id="thetaValue">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <div class="greek-card">
+                                    <h5>Vega</h5>
+                                    <p class="greek-value" id="vegaValue">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <div class="greek-card">
+                                    <h5>Rho</h5>
+                                    <p class="greek-value" id="rhoValue">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Risk Analysis Section -->
+    <section id="risk" class="section-padding">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Risk Analysis</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="results-card-modern">
+                        <h4>P&L Analysis</h4>
+                        <div id="pnlChart"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="results-card-modern">
+                        <h4>Volatility Surface</h4>
+                        <div id="volSurfaceChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section-padding bg-dark">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">About This Project</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="about-card">
+                        <p>
+                            This Black-Scholes option pricing application demonstrates proficiency in 
+                            quantitative finance, risk management, and financial modeling.
+                        </p>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5>Technologies</h5>
+                                <ul>
+                                    <li>JavaScript (ES6+)</li>
+                                    <li>HTML5 & CSS3</li>
+                                    <li>Bootstrap 5</li>
+                                    <li>Plotly.js</li>
+                                    <li>GitHub Pages</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Models</h5>
+                                <ul>
+                                    <li>Black-Scholes-Merton</li>
+                                    <li>Greeks Calculation</li>
+                                    <li>Monte Carlo Simulation</li>
+                                    <li>Implied Volatility</li>
+                                    <li>Risk Metrics</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="https://github.com/yourusername/risk-management-website" class="btn-modern btn-primary-modern">
+                                <i class="fab fa-github me-2"></i>View on GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p>&copy; 2025 Bowen Yao. All rights reserved.</p>
+            <p>Risk Management & Quantitative Finance Portfolio</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Black-Scholes Calculator -->
+    <script src="black-scholes.js"></script>
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+</body>
+</html>

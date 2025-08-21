@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block title %}Market Data - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Same style as Pricing page) -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Market</span>
+                    <span class="gradient-text-alt">Data</span>
+                </h1>
+                <p class="hero-subtitle">REAL-TIME MARKET ANALYTICS</p>
+                <p class="hero-description">
+                    Live market quotes and volatility surface visualization<br>
+                    Professional market data analysis platform.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Data Configuration</h5>
+                
+                <form id="dataForm">
+                    <div class="input-group-modern">
+                        <label for="dataSymbol" class="form-label-modern">Symbol</label>
+                        <input type="text" class="form-control-modern" id="dataSymbol" value="SPX">
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="dataExpiry" class="form-label-modern">Expiration</label>
+                        <select class="form-control-modern" id="dataExpiry">
+                            <option value="all">All Expirations</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="dataType" class="form-label-modern">Data Type</label>
+                        <select class="form-control-modern" id="dataType">
+                            <option value="options">Option Chain</option>
+                            <option value="volatility">Volatility Surface</option>
+                            <option value="quotes">Live Quotes</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-modern btn-calculate">
+                            <i class="fas fa-sync-alt me-2"></i>Load Data
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="refreshData()">
+                            <i class="fas fa-redo me-2"></i>Refresh
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Market Quotes -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Live Quotes</h5>
+                <div class="quote-list">
+                    <div class="quote-item">
+                        <div class="quote-header">
+                            <span class="quote-symbol">SPX</span>
+                            <span class="quote-price">4,783.25</span>
+                        </div>
+                        <div class="quote-change positive">+38.42 (+0.81%)</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div class="quote-header">
+                            <span class="quote-symbol">VIX</span>
+                            <span class="quote-price">14.82</span>
+                        </div>
+                        <div class="quote-change negative">-0.58 (-3.77%)</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div class="quote-header">
+                            <span class="quote-symbol">DXY</span>
+                            <span class="quote-price">103.45</span>
+                        </div>
+                        <div class="quote-change positive">+0.12 (+0.12%)</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div class="quote-header">
+                            <span class="quote-symbol">10Y</span>
+                            <span class="quote-price">4.25%</span>
+                        </div>
+                        <div class="quote-change negative">-0.05 (-1.16%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <!-- Volatility Surface -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Implied Volatility Surface</h5>
+                <div id="volSurfaceChart" style="height: 400px;">
+                    <div class="results-placeholder" style="padding-top: 150px;">
+                        <i class="fas fa-mountain results-icon"></i>
+                        <h6>Volatility Surface</h6>
+                        <p>Load data to visualize implied volatility surface.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option Chain -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Option Chain</h5>
+                <div class="table-responsive">
+                    <table class="table option-chain-table">
+                        <thead>
+                            <tr>
+                                <th colspan="4" class="text-center call-header">Calls</th>
+                                <th class="text-center strike-header">Strike</th>
+                                <th colspan="4" class="text-center put-header">Puts</th>
+                            </tr>
+                            <tr>
+                                <th>Bid</th>
+                                <th>Ask</th>
+                                <th>Last</th>
+                                <th>IV</th>
+                                <th class="text-center">Strike</th>
+                                <th>IV</th>
+                                <th>Last</th>
+                                <th>Ask</th>
+                                <th>Bid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="call-data">12.30</td>
+                                <td class="call-data">12.35</td>
+                                <td class="call-data">12.32</td>
+                                <td class="call-data">18.5%</td>
+                                <td class="text-center strike-value">4750</td>
+                                <td class="put-data">17.2%</td>
+                                <td class="put-data">8.15</td>
+                                <td class="put-data">8.20</td>
+                                <td class="put-data">8.10</td>
+                            </tr>
+                            <tr class="atm-row">
+                                <td class="call-data">8.50</td>
+                                <td class="call-data">8.55</td>
+                                <td class="call-data">8.52</td>
+                                <td class="call-data">16.8%</td>
+                                <td class="text-center strike-value">4775</td>
+                                <td class="put-data">16.5%</td>
+                                <td class="put-data">10.25</td>
+                                <td class="put-data">10.30</td>
+                                <td class="put-data">10.20</td>
+                            </tr>
+                            <tr>
+                                <td class="call-data">5.20</td>
+                                <td class="call-data">5.25</td>
+                                <td class="call-data">5.22</td>
+                                <td class="call-data">15.2%</td>
+                                <td class="text-center strike-value">4800</td>
+                                <td class="put-data">15.8%</td>
+                                <td class="put-data">13.45</td>
+                                <td class="put-data">13.50</td>
+                                <td class="put-data">13.40</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Term Structure -->
+            <div class="results-card-modern">
+                <h5 class="results-title">Volatility Term Structure</h5>
+                <div id="termStructureChart" style="height: 300px;">
+                    <div class="results-placeholder" style="padding-top: 100px;">
+                        <i class="fas fa-chart-area results-icon"></i>
+                        <h6>Term Structure</h6>
+                        <p>Volatility term structure will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Market Data specific styles matching Pricing page */
+.quote-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quote-item {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.quote-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.quote-symbol {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.quote-price {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.quote-change {
+    font-size: 0.85rem;
+}
+
+.quote-change.positive {
+    color: #00ff88;
+}
+
+.quote-change.negative {
+    color: #ff6b6b;
+}
+
+/* Option Chain Table */
+.option-chain-table {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.option-chain-table thead th {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    font-weight: 500;
+}
+
+.call-header {
+    background: rgba(0, 255, 136, 0.1) !important;
+}
+
+.put-header {
+    background: rgba(255, 107, 107, 0.1) !important;
+}
+
+.strike-header {
+    background: rgba(100, 200, 255, 0.1) !important;
+}
+
+.option-chain-table tbody td {
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.call-data {
+    color: #00ff88;
+}
+
+.put-data {
+    color: #ff6b6b;
+}
+
+.strike-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.atm-row {
+    background: rgba(100, 200, 255, 0.05);
+}
+</style>
+
+<script>
+// Initialize charts on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initVolatilitySurface();
+    initTermStructure();
+});
+
+// Data form submission
+document.getElementById('dataForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const dataType = document.getElementById('dataType').value;
+    
+    if (dataType === 'volatility') {
+        initVolatilitySurface();
+    } else if (dataType === 'quotes') {
+        updateQuotes();
+    }
+});
+
+// Initialize volatility surface
+function initVolatilitySurface() {
+    // Generate sample data
+    const strikes = [];
+    const maturities = [];
+    const volatilities = [];
+    
+    for (let k = 80; k <= 120; k += 2) {
+        for (let t = 0.1; t <= 2; t += 0.1) {
+            strikes.push(k);
+            maturities.push(t);
+            const moneyness = k / 100;
+            const baseVol = 0.15 + 0.05 * Math.pow(moneyness - 1, 2);
+            const termVol = baseVol * (1 + 0.1 * Math.sqrt(t));
+            volatilities.push(termVol * 100);
+        }
+    }
+    
+    const data = [{
+        x: maturities,
+        y: strikes,
+        z: volatilities,
+        type: 'surface',
+        colorscale: [
+            [0, '#1e3c72'],
+            [0.5, '#64c8ff'],
+            [1, '#00ff88']
+        ],
+        showscale: true,
+        colorbar: {
+            title: 'IV (%)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        }
+    }];
+    
+    const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#e0e0e0' },
+        scene: {
+            xaxis: {
+                title: 'Time to Expiry',
+                gridcolor: 'rgba(255, 255, 255, 0.1)',
+                titlefont: { color: '#e0e0e0' },
+                tickfont: { color: '#999' }
+            },
+            yaxis: {
+                title: 'Strike (%)',
+                gridcolor: 'rgba(255, 255, 255, 0.1)',
+                titlefont: { color: '#e0e0e0' },
+                tickfont: { color: '#999' }
+            },
+            zaxis: {
+                title: 'IV (%)',
+                gridcolor: 'rgba(255, 255, 255, 0.1)',
+                titlefont: { color: '#e0e0e0' },
+                tickfont: { color: '#999' }
+            },
+            camera: {
+                eye: { x: 1.5, y: -1.5, z: 1.5 }
+            }
+        },
+        margin: { t: 0, r: 0, b: 0, l: 0 }
+    };
+    
+    Plotly.newPlot('volSurfaceChart', data, layout, {responsive: true, displayModeBar: false});
+}
+
+// Initialize term structure
+function initTermStructure() {
+    const trace = {
+        x: ['1W', '2W', '1M', '2M', '3M', '6M', '9M', '1Y', '2Y'],
+        y: [22, 20, 18, 17, 16.5, 16, 15.8, 15.5, 15.2],
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {
+            color: '#64c8ff',
+            width: 3
+        },
+        marker: {
+            size: 8,
+            color: '#64c8ff'
+        },
+        fill: 'tozeroy',
+        fillcolor: 'rgba(100, 200, 255, 0.1)'
+    };
+    
+    const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#e0e0e0' },
+        xaxis: {
+            title: 'Maturity',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        yaxis: {
+            title: 'Implied Vol (%)',
+            gridcolor: 'rgba(255, 255, 255, 0.1)',
+            titlefont: { color: '#e0e0e0' },
+            tickfont: { color: '#999' }
+        },
+        margin: { t: 20, r: 20, b: 50, l: 50 }
+    };
+    
+    Plotly.newPlot('termStructureChart', [trace], layout, {responsive: true, displayModeBar: false});
+}
+
+// Update quotes
+function updateQuotes() {
+    // Simulate quote updates
+    const quotes = document.querySelectorAll('.quote-item');
+    quotes.forEach(quote => {
+        const priceEl = quote.querySelector('.quote-price');
+        const changeEl = quote.querySelector('.quote-change');
+        
+        // Add flash effect
+        quote.style.background = 'rgba(100, 200, 255, 0.1)';
+        setTimeout(() => {
+            quote.style.background = 'rgba(255, 255, 255, 0.03)';
+        }, 500);
+    });
+}
+
+// Refresh data
+function refreshData() {
+    updateQuotes();
+}
+</script>
+{% endblock %}

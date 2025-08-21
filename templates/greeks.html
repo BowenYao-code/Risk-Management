@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Greeks Analysis - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Greeks</span>
+                    <span class="gradient-text-alt">Analysis</span>
+                </h1>
+                <p class="hero-subtitle">RISK SENSITIVITY DASHBOARD</p>
+                <p class="hero-description">
+                    Comprehensive option Greeks visualization<br>
+                    with real-time sensitivity analysis.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Parameters</h5>
+                
+                <form id="greeksForm">
+                    <div class="input-group-modern">
+                        <label for="greeksSpot" class="form-label-modern">Current Spot Price</label>
+                        <input type="number" class="form-control-modern" id="greeksSpot" value="100" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="greeksStrike" class="form-label-modern">Strike Price</label>
+                        <input type="number" class="form-control-modern" id="greeksStrike" value="100" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="greeksTime" class="form-label-modern">Time to Expiry</label>
+                        <input type="number" class="form-control-modern" id="greeksTime" value="0.25" step="0.01" min="0.01">
+                        <span class="input-suffix">years</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="greeksRate" class="form-label-modern">Risk-free Rate</label>
+                        <input type="number" class="form-control-modern" id="greeksRate" value="5" step="0.1" min="0">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="greeksVol" class="form-label-modern">Volatility</label>
+                        <input type="number" class="form-control-modern" id="greeksVol" value="20" step="0.1" min="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="button" class="btn-modern btn-calculate" onclick="generateGreeksDashboard()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Analysis
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetGreeksForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Greeks Quick Reference -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Greeks Reference</h5>
+                
+                <div class="greeks-reference">
+                    <div class="greek-reference-item">
+                        <div class="greek-ref-symbol">Δ</div>
+                        <div class="greek-ref-content">
+                            <div class="greek-ref-name">Delta</div>
+                            <div class="greek-ref-desc">Price sensitivity to underlying asset changes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="greek-reference-item">
+                        <div class="greek-ref-symbol">Γ</div>
+                        <div class="greek-ref-content">
+                            <div class="greek-ref-name">Gamma</div>
+                            <div class="greek-ref-desc">Rate of change of Delta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="greek-reference-item">
+                        <div class="greek-ref-symbol">Θ</div>
+                        <div class="greek-ref-content">
+                            <div class="greek-ref-name">Theta</div>
+                            <div class="greek-ref-desc">Time decay sensitivity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="greek-reference-item">
+                        <div class="greek-ref-symbol">ν</div>
+                        <div class="greek-ref-content">
+                            <div class="greek-ref-name">Vega</div>
+                            <div class="greek-ref-desc">Volatility sensitivity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="greek-reference-item">
+                        <div class="greek-ref-symbol">ρ</div>
+                        <div class="greek-ref-content">
+                            <div class="greek-ref-name">Rho</div>
+                            <div class="greek-ref-desc">Interest rate sensitivity</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Greeks Dashboard -->
+        <div class="col-lg-8">
+            <div class="results-card-modern">
+                <h5 class="results-title">Interactive Greeks Dashboard</h5>
+                <div id="greeksDashboard" style="height: 1200px;">
+                    <div class="results-placeholder" style="padding-top: 250px;">
+                        <i class="fas fa-chart-area results-icon"></i>
+                        <h6>Greeks Visualization</h6>
+                        <p>Generate analysis to view comprehensive Greeks sensitivity charts showing how each Greek changes with underlying price movements.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function generateGreeksDashboard() {
+    const data = {
+        spot_price: parseFloat(document.getElementById('greeksSpot').value),
+        strike_price: parseFloat(document.getElementById('greeksStrike').value),
+        time_to_expiry: parseFloat(document.getElementById('greeksTime').value),
+        risk_free_rate: parseFloat(document.getElementById('greeksRate').value) / 100,
+        volatility: parseFloat(document.getElementById('greeksVol').value) / 100
+    };
+
+    // Clear previous content
+    document.getElementById('greeksDashboard').innerHTML = '';
+
+    fetch('/api/greeks-chart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const plotData = JSON.parse(result.chart);
+            Plotly.newPlot('greeksDashboard', plotData.data, plotData.layout, {
+                displayModeBar: true,
+                responsive: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+            });
+        } else {
+            document.getElementById('greeksDashboard').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Generation Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('greeksDashboard').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server. Please try again.</p>
+            </div>
+        `;
+    });
+}
+
+function resetGreeksForm() {
+    document.getElementById('greeksSpot').value = '100';
+    document.getElementById('greeksStrike').value = '100';
+    document.getElementById('greeksTime').value = '0.25';
+    document.getElementById('greeksRate').value = '5';
+    document.getElementById('greeksVol').value = '20';
+    
+    document.getElementById('greeksDashboard').innerHTML = `
+        <div class="results-placeholder" style="padding-top: 250px;">
+            <i class="fas fa-chart-area results-icon"></i>
+            <h6>Greeks Visualization</h6>
+            <p>Generate analysis to view comprehensive Greeks sensitivity charts showing how each Greek changes with underlying price movements.</p>
+        </div>
+    `;
+}
+
+// Remove auto-initialization to avoid loading issues
+</script>
+{% endblock %}

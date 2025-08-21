@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block title %}Option Pricing - Bowen Yao{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section" style="min-height: 60vh;">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <div class="hero-text">
+                <h1 class="hero-title" style="font-size: 2.5rem;">
+                    <span class="gradient-text">Option Pricing</span>
+                    <span class="gradient-text-alt">Engine</span>
+                </h1>
+                <p class="hero-subtitle">BLACK-SCHOLES MODEL</p>
+                <p class="hero-description">
+                    Advanced derivatives pricing with real-time calculations<br>
+                    and comprehensive risk analysis.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="calculator-card">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Parameters</h5>
+                
+                <form id="pricingForm">
+                    <div class="input-group-modern">
+                        <label for="spotPrice" class="form-label-modern">Spot Price</label>
+                        <input type="number" class="form-control-modern" id="spotPrice" value="100" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="strikePrice" class="form-label-modern">Strike Price</label>
+                        <input type="number" class="form-control-modern" id="strikePrice" value="100" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="timeToExpiry" class="form-label-modern">Time to Expiry</label>
+                        <input type="number" class="form-control-modern" id="timeToExpiry" value="0.25" step="0.01" min="0.01">
+                        <span class="input-suffix">years</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="riskFreeRate" class="form-label-modern">Risk-free Rate</label>
+                        <input type="number" class="form-control-modern" id="riskFreeRate" value="5" step="0.1" min="0">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="input-group-modern">
+                        <label for="volatility" class="form-label-modern">Volatility</label>
+                        <input type="number" class="form-control-modern" id="volatility" value="20" step="0.1" min="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="button" class="btn-modern btn-calculate" onclick="calculateOption()">
+                            <i class="fas fa-calculator me-2"></i>Calculate Prices
+                        </button>
+                        <button type="button" class="btn-modern btn-tertiary-modern" onclick="resetForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Implied Volatility Calculator -->
+            <div class="calculator-card mt-4">
+                <h5 class="section-title mb-4" style="font-size: 1.5rem;">Implied Volatility</h5>
+                
+                <form id="impliedVolForm">
+                    <div class="input-group-modern">
+                        <label for="marketPrice" class="form-label-modern">Market Price</label>
+                        <input type="number" class="form-control-modern" id="marketPrice" value="5" step="0.01" min="0.01">
+                        <span class="input-suffix">$</span>
+                    </div>
+                    
+                    <div class="input-group-modern">
+                        <label for="optionType" class="form-label-modern">Option Type</label>
+                        <select class="form-control-modern" id="optionType">
+                            <option value="call">Call Option</option>
+                            <option value="put">Put Option</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-modern btn-secondary-modern w-100 mt-3" onclick="calculateImpliedVol()">
+                        <i class="fas fa-search me-2"></i>Calculate IV
+                    </button>
+                </form>
+
+                <div id="impliedVolResults" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <!-- Option Prices -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Option Prices & Analysis</h5>
+                <div id="pricingResults">
+                    <div class="results-placeholder">
+                        <i class="fas fa-calculator results-icon"></i>
+                        <h6>Live Pricing</h6>
+                        <p>Enter parameters and calculate to see real-time option prices and analysis.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Greeks Summary -->
+            <div class="results-card-modern mb-4">
+                <h5 class="results-title">Greeks Analysis</h5>
+                <div id="greeksResults">
+                    <div class="results-placeholder">
+                        <i class="fas fa-chart-bar results-icon"></i>
+                        <h6>Greeks Dashboard</h6>
+                        <p>Comprehensive risk sensitivity analysis will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Surface Visualization -->
+            <div class="results-card-modern">
+                <h5 class="results-title">3D Price Surface</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <select class="form-control-modern" id="surfaceOptionType">
+                            <option value="call">Call Option Surface</option>
+                            <option value="put">Put Option Surface</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn-modern btn-tertiary-modern w-100" onclick="generatePriceSurface()">
+                            <i class="fas fa-cube me-2"></i>Generate Surface
+                        </button>
+                    </div>
+                </div>
+                <div id="priceSurface" style="height: 500px;">
+                    <div class="results-placeholder" style="padding-top: 150px;">
+                        <i class="fas fa-cube results-icon"></i>
+                        <h6>3D Visualization</h6>
+                        <p>Interactive price surface visualization will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentParams = {};
+
+function calculateOption() {
+    const data = {
+        spot_price: parseFloat(document.getElementById('spotPrice').value),
+        strike_price: parseFloat(document.getElementById('strikePrice').value),
+        time_to_expiry: parseFloat(document.getElementById('timeToExpiry').value),
+        risk_free_rate: parseFloat(document.getElementById('riskFreeRate').value) / 100,
+        volatility: parseFloat(document.getElementById('volatility').value) / 100,
+        option_type: 'call'
+    };
+
+    currentParams = data;
+
+    // Clear previous content
+    document.getElementById('pricingResults').innerHTML = '';
+
+    fetch('/api/calculate-option', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            displayPricingResults(result);
+            displayGreeksResults(result);
+        } else {
+            document.getElementById('pricingResults').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Calculation Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('pricingResults').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server. Please try again.</p>
+            </div>
+        `;
+    });
+}
+
+function displayPricingResults(result) {
+    const html = `
+        <div class="results-success">
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="price-card-modern call-option">
+                        <div class="price-card-header">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Call Option</span>
+                        </div>
+                        <div class="price-value">$${result.prices.call_price}</div>
+                        <div class="price-meta">Time Value: $${result.analysis.time_value_call}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="price-card-modern put-option">
+                        <div class="price-card-header">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Put Option</span>
+                        </div>
+                        <div class="price-value">$${result.prices.put_price}</div>
+                        <div class="price-meta">Time Value: $${result.analysis.time_value_put}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="analysis-grid mb-4">
+                <div class="analysis-item">
+                    <div class="analysis-label">Moneyness</div>
+                    <div class="analysis-value">${result.analysis.moneyness}</div>
+                    <div class="analysis-meta">S/K Ratio</div>
+                </div>
+                <div class="analysis-item">
+                    <div class="analysis-label">Put-Call Parity</div>
+                    <div class="analysis-value ${Math.abs(result.analysis.put_call_parity_check) < 0.01 ? 'text-success' : 'text-warning'}">
+                        ${Math.abs(result.analysis.put_call_parity_check) < 0.01 ? '✓' : '⚠'}
+                    </div>
+                    <div class="analysis-meta">Diff: ${result.analysis.put_call_parity_check}</div>
+                </div>
+                <div class="analysis-item">
+                    <div class="analysis-label">Days to Expiry</div>
+                    <div class="analysis-value">${Math.round(result.parameters.time_to_expiry * 365)}</div>
+                    <div class="analysis-meta">Calendar Days</div>
+                </div>
+            </div>
+            
+            <div class="validation-section">
+                <h6 class="validation-title">Monte Carlo Validation</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="validation-item">
+                            <div class="validation-comparison">
+                                <span>BS Model:</span>
+                                <strong>$${result.prices.call_price}</strong>
+                            </div>
+                            <div class="validation-comparison">
+                                <span>Monte Carlo:</span>
+                                <strong>$${result.monte_carlo_validation.call.price}</strong>
+                            </div>
+                            <div class="validation-confidence">
+                                95% CI: ±${result.monte_carlo_validation.call.confidence_interval}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="validation-item">
+                            <div class="validation-comparison">
+                                <span>BS Model:</span>
+                                <strong>$${result.prices.put_price}</strong>
+                            </div>
+                            <div class="validation-comparison">
+                                <span>Monte Carlo:</span>
+                                <strong>$${result.monte_carlo_validation.put.price}</strong>
+                            </div>
+                            <div class="validation-confidence">
+                                95% CI: ±${result.monte_carlo_validation.put.confidence_interval}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pricingResults').innerHTML = html;
+}
+
+function displayGreeksResults(result) {
+    const html = `
+        <div class="results-success">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h6 class="greeks-section-title call-title">Call Option Greeks</h6>
+                    <div class="greeks-modern-grid">
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Δ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Delta</div>
+                                <div class="greek-value">${result.greeks.call.delta}</div>
+                                <div class="greek-desc">Price sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Γ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Gamma</div>
+                                <div class="greek-value">${result.greeks.call.gamma}</div>
+                                <div class="greek-desc">Delta sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Θ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Theta</div>
+                                <div class="greek-value">${result.greeks.call.theta}</div>
+                                <div class="greek-desc">Time decay</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">ν</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Vega</div>
+                                <div class="greek-value">${result.greeks.call.vega}</div>
+                                <div class="greek-desc">Vol sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">ρ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Rho</div>
+                                <div class="greek-value">${result.greeks.call.rho}</div>
+                                <div class="greek-desc">Rate sensitivity</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="greeks-section-title put-title">Put Option Greeks</h6>
+                    <div class="greeks-modern-grid">
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Δ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Delta</div>
+                                <div class="greek-value">${result.greeks.put.delta}</div>
+                                <div class="greek-desc">Price sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Γ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Gamma</div>
+                                <div class="greek-value">${result.greeks.put.gamma}</div>
+                                <div class="greek-desc">Delta sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">Θ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Theta</div>
+                                <div class="greek-value">${result.greeks.put.theta}</div>
+                                <div class="greek-desc">Time decay</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">ν</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Vega</div>
+                                <div class="greek-value">${result.greeks.put.vega}</div>
+                                <div class="greek-desc">Vol sensitivity</div>
+                            </div>
+                        </div>
+                        <div class="greek-modern-item">
+                            <div class="greek-symbol">ρ</div>
+                            <div class="greek-details">
+                                <div class="greek-name">Rho</div>
+                                <div class="greek-value">${result.greeks.put.rho}</div>
+                                <div class="greek-desc">Rate sensitivity</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('greeksResults').innerHTML = html;
+}
+
+function calculateImpliedVol() {
+    const data = {
+        market_price: parseFloat(document.getElementById('marketPrice').value),
+        spot_price: parseFloat(document.getElementById('spotPrice').value),
+        strike_price: parseFloat(document.getElementById('strikePrice').value),
+        time_to_expiry: parseFloat(document.getElementById('timeToExpiry').value),
+        risk_free_rate: parseFloat(document.getElementById('riskFreeRate').value) / 100,
+        option_type: document.getElementById('optionType').value
+    };
+
+    // Clear previous results
+    document.getElementById('impliedVolResults').innerHTML = '';
+
+    fetch('/api/implied-volatility', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('impliedVolResults').innerHTML = `
+                <div class="iv-result-card">
+                    <div class="iv-header">Implied Volatility</div>
+                    <div class="iv-value">${result.implied_volatility_percent}%</div>
+                    <div class="iv-details">
+                        <div class="iv-detail-item">
+                            <span>Theoretical Price:</span>
+                            <strong>$${result.theoretical_price}</strong>
+                        </div>
+                        <div class="iv-detail-item">
+                            <span>Price Difference:</span>
+                            <strong>$${result.price_difference}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            document.getElementById('impliedVolResults').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Calculation Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('impliedVolResults').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server.</p>
+            </div>
+        `;
+    });
+}
+
+function generatePriceSurface() {
+    if (!currentParams.spot_price) {
+        alert('Please calculate option prices first');
+        return;
+    }
+
+    const data = {
+        strike_price: currentParams.strike_price,
+        time_to_expiry: currentParams.time_to_expiry,
+        risk_free_rate: currentParams.risk_free_rate,
+        volatility: currentParams.volatility,
+        option_type: document.getElementById('surfaceOptionType').value
+    };
+
+    // Clear previous content
+    document.getElementById('priceSurface').innerHTML = '';
+
+    fetch('/api/price-surface', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const plotData = JSON.parse(result.chart);
+            Plotly.newPlot('priceSurface', plotData.data, plotData.layout, {
+                displayModeBar: true,
+                responsive: true
+            });
+        } else {
+            document.getElementById('priceSurface').innerHTML = `
+                <div class="results-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Generation Error</h6>
+                    <p>${result.error}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('priceSurface').innerHTML = `
+            <div class="results-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h6>Network Error</h6>
+                <p>Unable to connect to server.</p>
+            </div>
+        `;
+    });
+}
+
+function resetForm() {
+    document.getElementById('spotPrice').value = '100';
+    document.getElementById('strikePrice').value = '100';
+    document.getElementById('timeToExpiry').value = '0.25';
+    document.getElementById('riskFreeRate').value = '5';
+    document.getElementById('volatility').value = '20';
+    document.getElementById('marketPrice').value = '5';
+    
+    document.getElementById('pricingResults').innerHTML = `
+        <div class="results-placeholder">
+            <i class="fas fa-calculator results-icon"></i>
+            <h6>Live Pricing</h6>
+            <p>Enter parameters and calculate to see real-time option prices and analysis.</p>
+        </div>
+    `;
+    
+    document.getElementById('greeksResults').innerHTML = `
+        <div class="results-placeholder">
+            <i class="fas fa-chart-bar results-icon"></i>
+            <h6>Greeks Dashboard</h6>
+            <p>Comprehensive risk sensitivity analysis will be displayed here.</p>
+        </div>
+    `;
+    
+    document.getElementById('impliedVolResults').innerHTML = '';
+    
+    document.getElementById('priceSurface').innerHTML = `
+        <div class="results-placeholder" style="padding-top: 150px;">
+            <i class="fas fa-cube results-icon"></i>
+            <h6>3D Visualization</h6>
+            <p>Interactive price surface visualization will appear here.</p>
+        </div>
+    `;
+}
+
+// Remove auto-initialization to avoid loading issues
+</script>
+{% endblock %}
